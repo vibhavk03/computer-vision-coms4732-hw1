@@ -1,0 +1,82 @@
+JPGs
+data/cathedral.jpg
+  Green shift: (5, 2) Score: 2109.1335332564395
+  Red shift:   (12, 3) Score: 4276.637308727412
+data/monastery.jpg
+  Green shift: (-3, 2) Score: 1018.8202998846596
+  Red shift:   (3, 2) Score: 3395.8708804306034
+data/tobolsk.jpg
+  Green shift: (3, 3) Score: 1533.3704575163397
+  Red shift:   (6, 3) Score: 4177.662237600923
+
+
+Given Images
+data/cathedral.jpg
+  Green shift: (5, 2) Score: 2109.1335332564395
+  Red shift:   (12, 3) Score: 4276.637308727412
+
+data/monastery.jpg
+  Green shift: (-3, 2) Score: 1018.8202998846596
+  Red shift:   (3, 2) Score: 3395.8708804306034
+
+data/tobolsk.jpg
+  Green shift: (3, 3) Score: 1533.3704575163397
+  Red shift:   (6, 3) Score: 4177.662237600923
+
+data/church.tif
+  Green shift: (25, 4) Score: 396476.3868466947
+  Red shift:   (58, -4) Score: 468438.2581033828
+
+data/emir.tif
+  Green shift: (49, 24) Score: 197987.4561552237
+  Red shift:   (75, -717) Score: 457512.36484080413
+
+data/harvesters.tif
+  Green shift: (59, 16) Score: 415737.9339944493
+  Red shift:   (124, 13) Score: 485700.7378393522
+
+data/icon.tif
+  Green shift: (41, 17) Score: 396631.40546265093
+  Red shift:   (89, 23) Score: 639587.8512133444
+
+data/italil.tif
+  Green shift: (38, 21) Score: 122657.6903656467
+  Red shift:   (76, 35) Score: 143098.2363260152
+
+data/lastochikino.tif
+  Green shift: (-2, -2) Score: 247727.14759044367
+  Red shift:   (75, -8) Score: 265725.1497420901
+
+data/lugano.tif
+  Green shift: (41, -16) Score: 126845.78992504842
+  Red shift:   (92, -29) Score: 651427.2469028122
+
+data/melons.tif
+  Green shift: (81, 10) Score: 114484.49693787219
+  Red shift:   (178, 13) Score: 268891.488778348
+
+data/self_portrait.tif
+  Green shift: (78, 29) Score: 220720.16511471587
+  Red shift:   (176, 37) Score: 244386.37770343362
+
+data/siren.tif
+  Green shift: (49, -6) Score: 452679.1768326591
+  Red shift:   (95, -25) Score: 608570.8912151211
+
+data/three_generations.tif
+  Green shift: (53, 14) Score: 134765.84098265984
+  Red shift:   (112, 11) Score: 114645.43928531013
+
+
+My Images
+mydata/Girvas waterfall.tif
+  Green shift: (13, -1) Score: 377510.30959720403
+  Red shift:   (80, -2) Score: 685172.7432644407
+
+mydata/railroad dam at Lizhma Station.tif
+  Green shift: (12, -2) Score: 142202.79415361874
+  Red shift:   (74, -10) Score: 237620.9930158899
+
+mydata/Painting of Napoleon.tif
+  Green shift: (63, 5) Score: 47135.21174336258
+  Red shift:   (133, -2) Score: 132485.73661197242
