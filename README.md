@@ -1,41 +1,131 @@
-# COMS4732 — Homework 1
+# 📸 COMS4732 — Computer Vision 2
+## Homework 1: Color Image Alignment (Prokudin–Gorskii)
 
-This folder contains `index.html` that documents the alignment results for Homework 1 and points to the generated aligned images saved by the notebook.
+**Name:** Vibhav Kashyap  
+**UNI:** vk2581  
+**Instructor:** Prof. Aleksander Holynski
 
-Files added
-- `index.html` — the webpage for your submission (open in a browser or convert to PDF).
+---
 
-How to regenerate outputs
-1. Open and run the `starter.ipynb` notebook in this folder. Ensure you run the helper and processing cells so the `process_JPG()` and `process_TIF()` functions are defined.
-2. Choose which images to process by editing the lists `images_JPGs`, `images_TIFs`, or `images_mine_TIFs` inside the notebook and run the processing cells. The notebook code saves aligned outputs to:
-   - `outputJPGs/` (JPEG-aligned outputs)
-   - `outputTIFs/` (aligned TIF outputs)
-   - `myOutputTIFs/` (your selected Prokudin-Gorskii images)
+## Overview
 
-Notes about filenames
-- The notebook saves files with base names like `cathedral_aligned.png`, `monastery_aligned.png`, and `tobolsk_aligned.png` into `outputJPGs/`.
-- For TIFs the notebook creates `outputTIFs/<base>_aligned.png`.
-- For your own Prokudin-Gorskii images the notebook writes into `myOutputTIFs/` using the original basenames.
+This project implements automatic color image reconstruction for Prokudin–Gorskii glass plate photographs. Each input image consists of three vertically stacked grayscale exposures corresponding to the Blue, Green, and Red channels. The goal is to align these channels and produce a high-quality color image.
 
-Generating a PDF of the webpage
-Option A — Use wkhtmltopdf (non-interactive):
+### 📋 Project Parts
+
+- **Part 1:** Single-scale L2 (SSD) alignment on low-resolution JPEG images
+- **Part 2:** Multi-resolution (pyramid) alignment for high-resolution TIFF images  
+- **Part 3:** Additional Prokudin–Gorskii images processed using the same pipeline
+
+> 💡 A visual summary of all results is provided in `index.html`
+
+---
+
+## Project Structure
+
 ```
-wkhtmltopdf index.html index.pdf
-```
-Option B — Use headless Chrome / Chromium:
-```
-google-chrome --headless --disable-gpu --print-to-pdf=index.pdf index.html
-```
-Option C — Serve locally and print from browser:
-```
-python -m http.server 8000
-# then open http://localhost:8000/index.html in your browser and Print -> Save as PDF
+CV_HW1/
+├── main.ipynb              # Main Jupyter notebook
+├── index.html              # Results visualization
+├── README.md               # This file
+├── shifts.txt              # Alignment displacement records
+├── data/                   # Input images
+├── outputJPGs/             # Part 1 results
+├── outputTIFs/             # Part 2 results
+└── myOutputTIFs/           # Part 3 results
 ```
 
-What to edit in `index.html`
-- Replace the placeholder offset text in `<figcaption>` elements with the actual offsets printed by the notebook when each image was processed.
+---
 
-Submission reminder
-- Do NOT upload image files to Gradescope; instead submit your code, `index.html`, `README.md`, and the generated `index.pdf` (you can generate the PDF locally using one of the commands above).
+## Dependencies
 
-If you want, I can also automatically fill the captions with the offsets from a notebook run (requires running the notebook here). Ask me to run the notebook and I'll run it and update `index.html` captions with the computed offsets.
+- Python 3.9+
+- NumPy
+- Matplotlib
+- scikit-image
+
+### Installation
+
+```bash
+pip install numpy matplotlib scikit-image
+```
+
+---
+
+## How to Run the Code
+
+All code is contained in `main.ipynb`.
+
+1. **Open the notebook:**
+   ```bash
+   jupyter notebook main.ipynb
+   ```
+
+2. **Run all cells** from top to bottom
+
+3. **View results:** Open `index.html` in your browser
+
+### What the Notebook Does
+
+- Reads input images from the `data/` directory
+- Performs channel splitting, alignment, and reconstruction
+- Saves final aligned images into:
+  - `outputJPGs/`
+  - `outputTIFs/`
+  - `myOutputTIFs/`
+
+---
+
+## Part 1 — Single-scale L2 Alignment
+
+### 🎯 Single-scale L2 Alignment (JPEG Images)
+
+Uses sum of squared differences (L2 distance) to align color channels via exhaustive search over a small displacement window. Applied to low-resolution JPEG images.
+
+**Images Processed:**
+- `cathedral.jpg`
+- `monastery.jpg`
+- `tobolsk.jpg`
+
+Results are saved in `outputJPGs/`.
+
+---
+
+## Part 2 — Multi-resolution (Pyramid) Alignment
+
+### 🔍 Multi-resolution (Pyramid) Alignment (TIFF Images)
+
+High-resolution TIF images have large channel misalignments, making single-scale exhaustive search impractical.
+
+**Pyramid Approach:**
+1. Alignment is first performed at coarse resolution
+2. Displacements are propagated and refined at higher resolutions
+3. L2 distance on Sobel edge responses is used for robustness
+
+This significantly reduces computation time while maintaining accuracy.
+
+Results are saved in `outputTIFs/`.
+
+---
+
+## Part 3 — Additional Prokudin–Gorskii Images
+
+### 📷 Additional Prokudin–Gorskii Images
+
+Three additional images from the Prokudin–Gorskii collection were selected and processed using the same multi-resolution alignment pipeline.
+
+Results are saved in `myOutputTIFs/`.
+
+---
+
+## Notes
+
+- All shifts are reported in `(dy, dx)` format
+- Green and Red channels are aligned relative to the Blue channel
+
+---
+
+## Acknowledgements
+
+I have used ChatGPT AI to debug and get some suggestions for the code I have written in the main.ipynb file.
+I have also used ChatGPT to create index.html and readme.md files.
