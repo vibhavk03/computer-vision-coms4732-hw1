@@ -11,6 +11,8 @@
 
 This project implements automatic color image reconstruction for Prokudin–Gorskii glass plate photographs. Each input image consists of three vertically stacked grayscale exposures corresponding to the Blue, Green, and Red channels. The goal is to align these channels and produce a high-quality color image.
 
+This project can also be accessed at my GitHub repository: https://github.com/vibhavk03/computer-vision-coms4732-hw1
+
 ### 📋 Project Parts
 
 - **Part 1:** Single-scale L2 (SSD) alignment on low-resolution JPEG images
@@ -127,5 +129,5 @@ Results are saved in `myOutputTIFs/`.
 
 ## Acknowledgements
 
-I have used ChatGPT AI to debug and get some suggestions for the code I have written in the main.ipynb file.
+I have used ChatGPT AI to debug and get some suggestions for the code I have written in the main.ipynb file.<br>
 I have also used ChatGPT to create index.html and readme.md files.
