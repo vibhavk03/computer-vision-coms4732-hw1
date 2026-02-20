@@ -56,7 +56,9 @@ All code is contained in `main.ipynb`.
 
 2. **Run all cells** from top to bottom
 
-3. **View results:** Open `index.html` in your browser
+3. Change the filename to img1 and img2 in the `data/` folder to test with different image pairs. You should also change the filename variable in the `main.ipynb` file to match the new filenames.
+
+4. Once you run the notebook for both images sets (taj_mahal and hill), you will find the results in the `outputs/` folder. You can also open the `index.html` file to view all the results in a single page.
 
 ### What the Notebook Does
 
