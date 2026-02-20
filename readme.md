@@ -37,10 +37,24 @@ CV_HW1/
 - scikit-image
 - SciPy
 
+### Environment Setup (venv)
+
+It is recommended to create a local Python virtual environment before installing dependencies.
+
+```bash
+# from the project root
+python3 -m venv venv
+
+# activate (macOS / Linux)
+source venv/bin/activate
+
+# (Windows PowerShell)
+# .\venv\Scripts\Activate.ps1
+
 ### Installation
 
 ```bash
-pip install numpy matplotlib scikit-image scipy
+pip install numpy matplotlib scikit-image scipy ipykernel
 ```
 
 ---
