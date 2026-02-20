@@ -1,7 +1,8 @@
 import numpy as np
 from scipy.ndimage import maximum_filter
 from skimage.transform import resize
-
+import os
+import matplotlib.pyplot as plt
 
 def nms_local_max(hrm, window_size=11, threshold_rel=0.01):
     """
@@ -66,3 +67,32 @@ def extract_descriptors(im, coords, patch_size=40, out_size=8):
         desc_list.append(v)
 
     return np.vstack(desc_list) if len(desc_list) > 0 else np.zeros((0, out_size*out_size*3), dtype=np.float32)
+
+def save_current_plot(filename, out_dir="outputs", dpi=200, tight=True, close=False):
+    """
+    Args:
+        filename: "foo.png" (if no extension, .png is added)
+        out_dir: folder to save into
+        dpi: image resolution
+        tight: uses tight bounding box (removes extra whitespace)
+        close: if True, closes the figure after saving
+    Returns:
+        full_path: where it was saved
+    """
+    os.makedirs(out_dir, exist_ok=True)
+
+    if "." not in os.path.basename(filename):
+        filename += ".png"
+
+    full_path = os.path.join(out_dir, filename)
+
+    save_kwargs = {"dpi": dpi}
+    if tight:
+        save_kwargs.update({"bbox_inches": "tight", "pad_inches": 0.02})
+
+    plt.savefig(full_path, **save_kwargs)
+
+    if close:
+        plt.close()
+
+    return full_path
