@@ -56,7 +56,7 @@ def extract_descriptors(im, coords, patch_size=40, out_size=8):
             continue
 
         # 2) downsample to 8x8 (apply anti_aliasing)
-        small = np.resize(window, (out_size, out_size), anti_aliasing=True)
+        small = resize(window, (out_size, out_size), anti_aliasing=True)
 
         # 3) bias/gain normalize: zero mean, unit std
         v = small.flatten().astype(np.float32)
