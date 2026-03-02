@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>COMS4732: Computer Vision 2 - Homework 2</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* --- Global Styles (light, minimal) --- */
+      :root {
+        --bg-color: #ffffff;
+        --text-primary: #111111;
+        --text-secondary: #555555;
+        --accent-color: #f6f6f6;
+        --border-color: #e8e8e8;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        max-width: 1080px;
+        margin: 60px auto;
+        line-height: 1.6;
+        color: var(--text-primary);
+        background-color: var(--bg-color);
+        padding: 0 24px;
+      }
+
+      /* --- Header --- */
+      header {
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 60px;
+        padding-bottom: 24px;
+      }
+
+      h1 {
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0 0 8px 0;
+        font-size: 2.2rem;
+      }
+
+      .meta {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 300;
+      }
+
+      /* --- Sections --- */
+      .section {
+        margin-bottom: 80px;
+      }
+
+      h2 {
+        font-weight: 500;
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        letter-spacing: -0.01em;
+      }
+
+      p {
+        color: var(--text-secondary);
+        max-width: 760px;
+        margin: 0 0 28px 0;
+      }
+
+      /* --- Step block --- */
+      .step {
+        margin-top: 28px;
+      }
+
+      h3 {
+        font-weight: 600;
+        font-size: 1.05rem;
+        margin: 0 0 14px 0;
+        letter-spacing: -0.01em;
+      }
+
+      /* --- Image Grid --- */
+      .images {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 34px;
+        align-items: start;
+      }
+
+      figure {
+        margin: 0;
+        break-inside: avoid;
+      }
+
+      .images img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 8px;
+        background-color: var(--accent-color);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid var(--border-color);
+      }
+
+      .images img:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+      }
+
+      figcaption {
+        margin-top: 12px;
+        font-size: 0.9rem;
+        color: #777;
+        line-height: 1.5;
+      }
+
+      figcaption span.data {
+        display: block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        color: #333;
+        margin-top: 6px;
+        background: #f7f7f7;
+        padding: 6px 10px;
+        border-radius: 6px;
+        width: fit-content;
+        border: 1px solid var(--border-color);
+      }
+
+      /* --- Footer --- */
+      footer {
+        margin-top: 80px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 24px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      footer p {
+        margin: 6px 0;
+        color: var(--text-secondary);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>COMS4732 — Computer Vision 2</h1>
+      <div class="meta">Homework 2: Automatic Feature Matching Across Images</div>
+    </header>
+
+    <!-- ===================== TAJ MAHAL ===================== -->
+    <section class="section">
+      <h2>Dataset — Taj Mahal</h2>
+      <p>
+        Results for the Taj Mahal image pair: Harris corners, NMS filtering,
+        NNDR analysis, matches visualization, and panorama stitching.
+      </p>
+
+      <div class="step">
+        <h3>Step 1 — Raw Images</h3>
+        <div class="images">
+          <figure>
+            <img src="outputs/1_taj_mahal_raw.png" alt="taj_mahal raw" />
+            <figcaption>
+              1_taj_mahal_raw.png
+              <span class="data">outputs/1_taj_mahal_raw.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 2 — Harris Corners</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/2_taj_mahal_harris_corners.png"
+              alt="taj_mahal harris corners"
+            />
+            <figcaption>
+              2_taj_mahal_harris_corners.png
+              <span class="data">outputs/2_taj_mahal_harris_corners.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 3 — Harris Corners + NMS</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/3_taj_mahal_harris_corners_nms.png"
+              alt="taj_mahal nms corners"
+            />
+            <figcaption>
+              3_taj_mahal_harris_corners_nms.png
+              <span class="data">outputs/3_taj_mahal_harris_corners_nms.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 4 — NNDR Histogram</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/4_taj_mahal_nndr_histogram.png"
+              alt="taj_mahal nndr histogram"
+            />
+            <figcaption>
+              4_taj_mahal_nndr_histogram.png
+              <span class="data">outputs/4_taj_mahal_nndr_histogram.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 5 — Best Features by NNDR</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/5_taj_mahal_best_features_by_nndr.png"
+              alt="taj_mahal best features by nndr"
+            />
+            <figcaption>
+              5_taj_mahal_best_features_by_nndr.png
+              <span class="data">outputs/5_taj_mahal_best_features_by_nndr.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 6 — Matches</h3>
+        <div class="images">
+          <figure>
+            <img src="outputs/6_taj_mahal_matches.png" alt="taj_mahal matches" />
+            <figcaption>
+              6_taj_mahal_matches.png
+              <span class="data">outputs/6_taj_mahal_matches.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Panorama</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/2_taj_mahal_panorama.png"
+              alt="taj_mahal panorama"
+            />
+            <figcaption>
+              2_taj_mahal_panorama.png
+              <span class="data">outputs/2_taj_mahal_panorama.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== HILL ===================== -->
+    <section class="section">
+      <h2>Dataset — Hill</h2>
+      <p>
+        Results for the Hill image pair: Harris corners, NMS filtering, NNDR
+        analysis, matches visualization, and panorama stitching.
+      </p>
+
+      <div class="step">
+        <h3>Step 1 — Raw Images</h3>
+        <div class="images">
+          <figure>
+            <img src="outputs/1_hill_raw.png" alt="hill raw" />
+            <figcaption>
+              1_hill_raw.png
+              <span class="data">outputs/1_hill_raw.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 2 — Harris Corners</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/2_hill_harris_corners.png"
+              alt="hill harris corners"
+            />
+            <figcaption>
+              2_hill_harris_corners.png
+              <span class="data">outputs/2_hill_harris_corners.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 3 — Harris Corners + NMS</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/3_hill_harris_corners_nms.png"
+              alt="hill nms corners"
+            />
+            <figcaption>
+              3_hill_harris_corners_nms.png
+              <span class="data">outputs/3_hill_harris_corners_nms.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 4 — NNDR Histogram</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/4_hill_nndr_histogram.png"
+              alt="hill nndr histogram"
+            />
+            <figcaption>
+              4_hill_nndr_histogram.png
+              <span class="data">outputs/4_hill_nndr_histogram.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 5 — Best Features by NNDR</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/5_hill_best_features_by_nndr.png"
+              alt="hill best features by nndr"
+            />
+            <figcaption>
+              5_hill_best_features_by_nndr.png
+              <span class="data">outputs/5_hill_best_features_by_nndr.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 6 — Matches</h3>
+        <div class="images">
+          <figure>
+            <img src="outputs/6_hill_matches.png" alt="hill matches" />
+            <figcaption>
+              6_hill_matches.png
+              <span class="data">outputs/6_hill_matches.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Panorama</h3>
+        <div class="images">
+          <figure>
+            <img src="outputs/2_hill_panorama.png" alt="hill panorama" />
+            <figcaption>
+              2_hill_panorama.png
+              <span class="data">outputs/2_hill_panorama.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>Vibhav Kashyap — vk2581</p>
+      <p>Project can be accessed at - https://github.com/vibhavk03/computer-vision-coms4732-hw1/tree/hw2-dev</p>
+    </footer>
+  </body>
+</html>
