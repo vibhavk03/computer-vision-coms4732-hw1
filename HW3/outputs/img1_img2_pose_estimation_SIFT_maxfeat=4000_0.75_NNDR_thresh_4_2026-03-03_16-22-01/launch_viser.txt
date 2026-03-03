@@ -1,0 +1,2 @@
+# Launch 3D visualization:
+python visualize_viser.py outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step5_scene_data.npz
