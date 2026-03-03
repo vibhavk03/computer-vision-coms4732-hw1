@@ -1,5 +1,5 @@
 # 📸 COMS4732 — Computer Vision 2
-## Homework 2: Automatic Feature Matching Across Images
+## Homework 3: Structure from Motion
 
 **Name:** Vibhav Kashyap  
 **UNI:** vk2581  
