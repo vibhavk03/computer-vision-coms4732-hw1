@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>COMS4732 — Computer Vision 2 — HW3: Two-View Stereo (Pose + Sparse SfM)</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-color: #ffffff;
+        --text-primary: #111111;
+        --text-secondary: #555555;
+        --accent-color: #f6f6f6;
+        --border-color: #e8e8e8;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        max-width: 1080px;
+        margin: 60px auto;
+        line-height: 1.6;
+        color: var(--text-primary);
+        background-color: var(--bg-color);
+        padding: 0 24px;
+      }
+
+      header {
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 60px;
+        padding-bottom: 24px;
+      }
+
+      h1 {
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin: 0 0 8px 0;
+        font-size: 2.2rem;
+      }
+
+      .meta {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 300;
+      }
+
+      .section {
+        margin-bottom: 80px;
+      }
+
+      h2 {
+        font-weight: 500;
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        letter-spacing: -0.01em;
+      }
+
+      p {
+        color: var(--text-secondary);
+        max-width: 860px;
+        margin: 0 0 18px 0;
+      }
+
+      .step {
+        margin-top: 28px;
+      }
+
+      h3 {
+        font-weight: 600;
+        font-size: 1.05rem;
+        margin: 0 0 14px 0;
+        letter-spacing: -0.01em;
+      }
+
+      .images {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 34px;
+        align-items: start;
+      }
+
+      figure {
+        margin: 0;
+        break-inside: avoid;
+      }
+
+      .images img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 8px;
+        background-color: var(--accent-color);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid var(--border-color);
+      }
+
+      .images img:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+      }
+
+      figcaption {
+        margin-top: 12px;
+        font-size: 0.9rem;
+        color: #777;
+        line-height: 1.5;
+      }
+
+      figcaption span.data {
+        display: block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        color: #333;
+        margin-top: 6px;
+        background: #f7f7f7;
+        padding: 6px 10px;
+        border-radius: 6px;
+        width: fit-content;
+        border: 1px solid var(--border-color);
+      }
+
+      .kv {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 10px 18px;
+        max-width: 900px;
+        margin-top: 12px;
+      }
+
+      .kv div.key {
+        color: var(--text-secondary);
+      }
+
+      .kv div.val {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.92rem;
+        color: #222;
+      }
+
+      pre.codeblock {
+        font-family: "JetBrains Mono", monospace;
+        background: #f7f7f7;
+        border: 1px solid var(--border-color);
+        padding: 14px 16px;
+        border-radius: 10px;
+        overflow-x: auto;
+        max-width: 900px;
+        margin: 12px 0 0 0;
+        font-size: 0.9rem;
+        color: #222;
+      }
+
+      ul {
+        color: var(--text-secondary);
+        margin: 8px 0 0 18px;
+      }
+
+      footer {
+        margin-top: 80px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 24px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      footer p {
+        margin: 6px 0;
+        color: var(--text-secondary);
+      }
+
+      .note {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        background: #fbfbfb;
+        border: 1px solid var(--border-color);
+        padding: 12px 14px;
+        border-radius: 10px;
+        margin-top: 14px;
+        max-width: 900px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 60px;
+        padding-bottom: 24px;
+        gap: 24px;
+    }
+
+    .header-left h1 {
+        margin: 0 0 8px 0;
+    }
+
+    .header-left h3 {
+        margin: 6px 0 0 0;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .header-right {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .header-right .meta {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 300;
+    }
+    </style>
+  </head>
+
+  <body>
+    <header class="header">
+    <div class="header-left">
+        <h1>COMS4732 — Computer Vision 2</h1>
+        <h3>Professor Aleksander Holynski</h3>
+        <h3>HW3: Simple Structure from Motion</h3>
+    </div>
+
+    <div class="header-right">
+        <div class="meta">Vibhav Kashyap — vk2581</div>
+    </div>
+    </header>
+
+    <!-- ===================== OVERVIEW ===================== -->
+    <section class="section">
+      <h2>Overview</h2>
+      <p>
+        This assignment implements a two-view calibrated SfM pipeline on the staff-provided image pair:
+        camera intrinsics estimation, SIFT feature detection, NNDR feature matching, RANSAC pose estimation
+        via the Essential matrix (8-point), and sparse triangulation with reprojection filtering.
+      </p>
+
+      <div class="note">
+        <b>Paths:</b> All outputs below are read from the run directory:
+        <span style="font-family: 'JetBrains Mono', monospace;">outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/</span><br />
+        If you re-ran the pipeline and your folder name differs, update the <b>RUN_DIR</b> below in the HTML paths.
+      </div>
+    </section>
+
+    <!-- ===================== REPORTED VALUES ===================== -->
+    <section class="section">
+      <h2>Reported Values (Staff-Provided Images)</h2>
+      <p>
+        The assignment requires reporting the random seed, intrinsics matrix <i>K</i>, SIFT feature counts,
+        NNDR threshold, RANSAC parameters, and any staff-provided parameters modified.
+      </p>
+
+      <div class="kv">
+        <div class="key"><b>Random seed</b></div>
+        <div class="val">101</div>
+
+        <div class="key"><b>SIFT max features</b></div>
+        <div class="val">4000</div>
+
+        <div class="key"><b>SIFT features detected</b></div>
+        <div class="val">Image 1: 3969, Image 2: 3962</div>
+
+        <div class="key"><b>NNDR threshold</b></div>
+        <div class="val">0.75</div>
+
+        <div class="key"><b>RANSAC iterations</b></div>
+        <div class="val">2000</div>
+
+        <div class="key"><b>RANSAC ε</b></div>
+        <div class="val">5e-4 (squared Sampson distance, normalized coords)</div>
+
+        <div class="key"><b>Other modified parameters</b></div>
+        <div class="val">None (used staff defaults except the reported values above)</div>
+      </div>
+
+      <h3 style="margin-top: 22px;">Camera Intrinsics Matrix K</h3>
+      <pre class="codeblock">
+[  887.49    0.00  640.00]
+[    0.00  887.49  480.00]
+[    0.00    0.00    1.00]
+      </pre>
+    </section>
+
+    <!-- ===================== OUTPUTS ===================== -->
+    <section class="section">
+      <h2>Pipeline Visualizations</h2>
+      <p>
+        The figures below correspond directly to the required deliverables: SIFT features, NNDR histogram with threshold,
+        top-5 NNDR matches, correspondences before/after RANSAC, RANSAC convergence, epipolar lines, and final sparse reconstruction.
+      </p>
+
+      <!-- Update this prefix if your run directory differs -->
+      <!-- RUN_DIR = outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01 -->
+
+      <div class="step">
+        <h3>Step 0 — Original Images (Side-by-Side)</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step0_original_images.png"
+              alt="step0 original images"
+            />
+            <figcaption>
+              Original staff-provided image pair.
+              <span class="data">.../step0_original_images.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 2 — SIFT Features (Side-by-Side)</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step2_sift_keypoints.png"
+              alt="step2 sift keypoints"
+            />
+            <figcaption>
+              SIFT keypoints detected in both images (max_features=4000).
+              <span class="data">.../step2_sift_keypoints.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 3 — NNDR Histogram (Threshold Overlaid)</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step3_feature_matching_nndr_histogram.png"
+              alt="step3 nndr histogram"
+            />
+            <figcaption>
+              NNDR distribution (L2), threshold = 0.75.
+              <span class="data">.../step3_feature_matching_nndr_histogram.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 3 — Top 5 Matches Ranked by NNDR</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step3_feature_matching_top5_nndr.png"
+              alt="step3 top5 nndr"
+            />
+            <figcaption>
+              Top 5 matches ranked by NNDR.
+              <span class="data">.../step3_feature_matching_top5_nndr.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 3 — Correspondences Before RANSAC</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step3_correspondences_before_ransac.png"
+              alt="step3 correspondences before ransac"
+            />
+            <figcaption>
+              Matches before RANSAC (tentative correspondences).
+              <span class="data">.../step3_correspondences_before_ransac.png</span>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step3_feature_matching.png"
+              alt="step3 feature matching"
+            />
+            <figcaption>
+              Feature matching visualization before RANSAC.
+              <span class="data">.../step3_feature_matching.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 4 — Correspondences After RANSAC (Inliers)</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step4_correspondences_after_ransac.png"
+              alt="step4 correspondences after ransac"
+            />
+            <figcaption>
+              Correspondences after RANSAC (inliers only).
+              <span class="data">.../step4_correspondences_after_ransac.png</span>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step4_feature_matching_after_ransac.png"
+              alt="step4 feature matching after ransac"
+            />
+            <figcaption>
+              Feature matching visualization after RANSAC (inliers).
+              <span class="data">.../step4_feature_matching_after_ransac.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 4 — RANSAC Convergence</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step4_ransac_convergence.png"
+              alt="step4 ransac convergence"
+            />
+            <figcaption>
+              RANSAC inlier count over iterations and best-so-far curve.
+              <span class="data">.../step4_ransac_convergence.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 4 — Epipolar Lines (Using F = K^{-T} E K^{-1})</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step4_epipolar_lines.png"
+              alt="step4 epipolar lines"
+            />
+            <figcaption>
+              Epipolar geometry visualization on inlier correspondences.
+              <span class="data">.../step4_epipolar_lines.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Step 5 — Sparse Reconstruction</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step5_3d_reconstruction.png"
+              alt="step5 3d reconstruction"
+            />
+            <figcaption>
+              3D point cloud (sparse triangulation).
+              <span class="data">.../step5_3d_reconstruction.png</span>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step5_camera_poses.png"
+              alt="step5 camera poses"
+            />
+            <figcaption>
+              Camera configuration and 3D points.
+              <span class="data">.../step5_camera_poses.png</span>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step5_pose_summary.png"
+              alt="step5 pose summary"
+            />
+            <figcaption>
+              Pose summary (rotation/translation + depth distribution).
+              <span class="data">.../step5_pose_summary.png</span>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="outputs/img1_img2_pose_estimation_SIFT_maxfeat=4000_0.75_NNDR_thresh_4_2026-03-03_16-22-01/step5_pipeline_grid.png"
+              alt="step5 pipeline grid"
+            />
+            <figcaption>
+              Complete pipeline grid summary.
+              <span class="data">.../step5_pipeline_grid.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== VISER SCREENSHOTS ===================== -->
+    <section class="section">
+      <h2>Sparse Point Cloud (viser) — Screenshots + Landmarks</h2>
+      <p>
+        Below are 3 screenshots from the viser visualization. Each screenshot includes brief landmark descriptions
+        based on visible point clusters and the underlying scene structure.
+      </p>
+
+      <div class="step">
+        <h3>viser Screenshot 1</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="screenshots/viser1.png"
+              alt="viser screenshot 1"
+            />
+            <figcaption>
+              Landmark notes:
+              <ul>
+                <li><b>The top-most cluster of points</b> corresponds to the the bookshelf.</li>
+                <li><b>The middle cluster</b> corresponds to the high-texture regions on the table + objects.</li>
+                <li><b>The bottom most scattered points</b> correspond to poster hung on the drawer which is located toward the right side of the scene.</li>
+              </ul>
+              <span class="data">.../viser_1.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>viser Screenshot 2</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="screenshots/viser2.png"
+              alt="viser screenshot 2"
+            />
+            <figcaption>
+              Landmark notes:
+              <ul>
+                <li><b>Left cluster</b> aligns with the bookshelf points and edges.</li>
+                <li><b>The middle cluster</b> corresponds to the objects in the very middle of the scene.</li>
+                <li><b>The points towards the upper right side </b> correspond to the drawer chest in the image.</li>
+              </ul>
+              <span class="data">.../viser_2.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>viser Screenshot 3</h3>
+        <div class="images">
+          <figure>
+            <img
+              src="screenshots/viser3.png"
+              alt="viser screenshot 3"
+            />
+            <figcaption>
+              Landmark notes:
+              <ul>
+                <li><b>Top most cluster</b> represents the bookshelf / tall vertical edges.</li>
+                <li><b>Centermost points</b> towards the left side indicate the objects in the foreground.</li>
+                <li><b>The right most cluster</b> is from the stack of drawers with the poster hung from it. </li>
+              </ul>
+              <span class="data">.../viser_3.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p><b>Vibhav Kashyap</b> — UNI: vk2581</p>
+      <p>HW3 — Simple Structure from Motion</p>
+    </footer>
+  </body>
+</html>
