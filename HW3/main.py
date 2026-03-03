@@ -57,13 +57,12 @@ def seed_everything(seed: int):
 # CONFIGURATION
 # ============================================================================
 
-
 @dataclass
 class Config:
     """Configuration for the two-view stereo reconstruction pipeline."""
     # Image paths
-    img1_path: str = '/data/img1.jpeg'
-    img2_path: str = '/data/img2.jpeg'
+    img1_path: str = 'data/img1.jpeg'
+    img2_path: str = 'data/img2.jpeg'
     output_dir_path: str = "outputs"
 
     random_seed: int = 101
@@ -88,7 +87,7 @@ class Config:
 
     # Step 4 RANSAC
     ransac_s: int = 8  # Minimum 8 points for essential matrix
-    ransac_epsilon = 1e-3 # TODO: provide distance threshold
+    ransac_epsilon = 5e-4 # TODO: provide distance threshold
     ransac_num_iters: int = 2000 # TODO: provide number of ransac iterations
 
     # Step 5 Triangulation filtering
