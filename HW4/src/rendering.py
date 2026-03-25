@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 from src.dataset_3d import pixels_to_rays
 
+
 def batched_T_i(sigmas: torch.Tensor, delta: torch.Tensor, device: str = "cuda"):
     start = torch.ones((sigmas.shape[0], 1, 1)).to(device)
 
@@ -35,8 +36,32 @@ def sample_along_rays(
         samples: torch.Tensor of shape (num_pixels, num_samples_along_ray, 3) representing
         the 3D positions of the samples along each ray
     """
-    # TODO implement yourself
-    return None
+    r_os = r_os.to(device)
+    r_ds = r_ds.to(device)
+
+    num_pixels = r_os.shape[0]
+
+    # width of each interval along the ray
+    t_width = (far - near) / num_samples_along_ray
+
+    # sample starts of each interval: near, near+t_width, ...
+    t = (
+        near
+        + torch.arange(num_samples_along_ray, dtype=torch.float32, device=device)
+        * t_width
+    )
+
+    # expand to all rays
+    t = t.unsqueeze(0).repeat(num_pixels, 1)  # (num_pixels, num_samples_along_ray)
+
+    # perturb inside each interval during training
+    if perturb:
+        t = t + torch.rand_like(t) * t_width
+
+    # x = r_o + t * r_d
+    samples = r_os.unsqueeze(1) + t.unsqueeze(-1) * r_ds.unsqueeze(1)
+
+    return samples
 
 
 def volrend(
@@ -91,4 +116,6 @@ def predict_rgbs(
         predicted_rgbs: torch.Tensor of shape (num_pixels, 3) representing the predicted colors
     """
     rgbs, sigmas = model(xyzs, r_ds)
-    return volrend(sigmas, rgbs, near=near, far=far, num_samples_along_ray=num_samples_along_ray)
+    return volrend(
+        sigmas, rgbs, near=near, far=far, num_samples_along_ray=num_samples_along_ray
+    )

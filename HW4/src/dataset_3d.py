@@ -4,7 +4,7 @@ import numpy as np
 
 
 def load_data(
-    data_path: str, 
+    data_path: str,
 ):
     """Load and preprocess dataset from an npz file.
 
@@ -21,24 +21,24 @@ def load_data(
     """
     data = np.load(data_path)
 
-
     # Training images: [100, 200, 200, 3]
-    images_train = data["images_train"] / 255.0
+    images_train = torch.from_numpy(data["images_train"]).float() / 255.0
 
     # Cameras for the training images
     # (camera-to-world transformation matrix): [100, 4, 4]
-    c2ws_train = data["c2ws_train"]
+    c2ws_train = torch.from_numpy(data["c2ws_train"]).float()
 
     # Validation images:
-    images_val = data["images_val"] / 255.0
+    images_val = torch.from_numpy(data["images_val"]).float() / 255.0
 
     # Cameras for the validation images: [10, 4, 4]
     # (camera-to-world transformation matrix): [10, 200, 200, 3]
-    c2ws_val = data["c2ws_val"]
+    c2ws_val = torch.from_numpy(data["c2ws_val"]).float()
 
     # Test cameras for novel-view video rendering:
     # (camera-to-world transformation matrix): [60, 4, 4]
-    c2ws_test = data["c2ws_test"]
+
+    c2ws_test = torch.from_numpy(data["c2ws_test"]).float()
 
     # Camera focal length
     focal = data["focal"]  # float
@@ -149,8 +149,38 @@ def image_to_rays(
         torch.Tensor of shape (H, W, 6) where [:, :, :3] are ray origins
         and [:, :, 3:] are ray directions
     """
-    # TODO implement yourself
-    pass
+    H, W = image.shape[:2]
+
+    # create pixel grid
+    v, u = torch.meshgrid(
+        torch.arange(H, dtype=torch.float32, device=device),
+        torch.arange(W, dtype=torch.float32, device=device),
+        indexing="ij",
+    )
+
+    # use pixel centers
+    uvs = torch.stack([u + 0.5, v + 0.5], dim=-1).reshape(-1, 2)  # (H*W, 2)
+
+    # convert all pixels to rays
+    r_os, r_ds = pixels_to_rays(
+        K=K,
+        c2w=c2w,
+        uvs=uvs,
+        verbose=verbose,
+        device=device,
+    )
+
+    # combine origin and direction
+    rays = torch.cat([r_os, r_ds], dim=-1)  # (H*W, 6)
+
+    # reshape back to image grid
+    rays = rays.reshape(H, W, 6)
+
+    if verbose:
+        print(f"image shape: {image.shape}")
+        print(f"rays shape: {rays.shape} should be (H, W, 6)")
+
+    return rays
 
 
 def images_to_rays(
@@ -173,8 +203,27 @@ def images_to_rays(
         torch.Tensor of shape (num_images, H, W, 6) where [:, :, :, :3] are ray origins
         and [:, :, :, 3:] are ray directions
     """
-    # TODO implement yourself
-    pass
+    num_images = images.shape[0]
+    all_rays = []
+
+    for i in range(num_images):
+        rays_i = image_to_rays(
+            image=images[i],
+            c2w=c2ws[i],
+            K=K,
+            verbose=verbose,
+            device=device,
+        )
+        all_rays.append(rays_i)
+
+    all_rays = torch.stack(all_rays, dim=0)  # (num_images, H, W, 6)
+
+    if verbose:
+        print(f"images shape: {images.shape}")
+        print(f"c2ws shape: {c2ws.shape}")
+        print(f"all_rays shape: {all_rays.shape} should be (num_images, H, W, 6)")
+
+    return all_rays
 
 
 class RaysData(Dataset):
@@ -208,9 +257,10 @@ class RaysData(Dataset):
               colors flattened (images.reshape(-1, 3)), used by __len__() and sample_rays()
               to return ground truth colors for sampled rays
         """
-        self.images = images
-        self.K = K
-        self.c2ws = c2ws
+        self.device = device
+        self.images = images.to(device)
+        self.K = K.to(device)
+        self.c2ws = c2ws.to(device)
         self.h, self.w = self.images.shape[1:3]
         self.num_images = self.images.shape[0]
 
@@ -224,8 +274,44 @@ class RaysData(Dataset):
         #   assert images[0, uvs[:, 1], uvs[:, 0]] == dataset.pixels[:]
         # Hint: torch.meshgrid with torch.arange(W) and torch.arange(H)
 
-        # TODO implement yourself
-        pass
+        # ---------------------------------------------------
+        # 1. Build integer pixel coordinates (x, y) for 1 image
+        # ---------------------------------------------------
+        y, x = torch.meshgrid(
+            torch.arange(self.h, device=device),
+            torch.arange(self.w, device=device),
+            indexing="ij",
+        )
+
+        # shape: (H, W, 2) -> (H*W, 2)
+        uvs_one_image = torch.stack([x, y], dim=-1).reshape(-1, 2)
+
+        # Repeat the same pixel grid for every image
+        # final shape: (num_images * H * W, 2)
+        self.uvs = uvs_one_image.repeat(self.num_images, 1)
+
+        # ---------------------------------------------------
+        # 2. Precompute all rays for all images
+        # images_to_rays returns shape: (num_images, H, W, 6)
+        # first 3 = ray origin, last 3 = ray direction
+        # ---------------------------------------------------
+        all_rays = images_to_rays(
+            images=self.images,
+            c2ws=self.c2ws,
+            K=self.K,
+            device=device,
+        )
+
+        # Flatten rays
+        # shape: (num_images * H * W, 3)
+        self.rays_o = all_rays[..., :3].reshape(-1, 3)
+        self.rays_d = all_rays[..., 3:].reshape(-1, 3)
+
+        # ---------------------------------------------------
+        # 3. Flatten all ground-truth RGB values
+        # shape: (num_images * H * W, 3)
+        # ---------------------------------------------------
+        self.gt_rgbs = self.images.reshape(-1, 3)
 
     def __len__(self):
         """Return the total number of rays in the dataset.
@@ -234,7 +320,7 @@ class RaysData(Dataset):
             int representing num_images * H * W
         """
         # TODO implement yourself
-        pass
+        return self.num_images * self.h * self.w
 
     def sample_rays(self, num_rays: int):
         """Sample random rays from the dataset.
@@ -250,5 +336,10 @@ class RaysData(Dataset):
         Hints:
             You need to randomly sample the rays and pixels using num_rays
         """
-        # TODO implement yourself
-        return None, None, None
+        idxs = torch.randint(0, len(self), (num_rays,), device=self.device)
+
+        r_os = self.rays_o[idxs]
+        r_ds = self.rays_d[idxs]
+        gt_rgbs = self.gt_rgbs[idxs]
+
+        return r_os, r_ds, gt_rgbs
