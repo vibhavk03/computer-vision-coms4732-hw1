@@ -170,9 +170,7 @@ This script:
 
 The first part treats an image as a function:
 
-\[
-f(x, y) \rightarrow (r, g, b)
-\]
+`f(x, y) -> (r, g, b)`
 
 where the network takes 2D coordinates as input and predicts the RGB value at that location.
 
@@ -197,16 +195,14 @@ The second part extends the neural field idea from 2D image coordinates to a ful
 
 A NeRF models:
 
-\[
-F(\mathbf{x}, \mathbf{d}) \rightarrow (\mathbf{c}, \sigma)
-\]
+`F(x, d) -> (c, sigma)`
 
 where:
 
-- \(\mathbf{x}\) is a 3D location in space
-- \(\mathbf{d}\) is the viewing direction
-- \(\mathbf{c}\) is the RGB color
-- \(\sigma\) is the volume density
+- `x` is a 3D location in space
+- `d` is the viewing direction
+- `c` is the RGB color
+- `sigma` is the volume density
 
 ### Step 1 — Dataset Loading
 
@@ -221,14 +217,11 @@ The loader reads:
 
 It then constructs the intrinsic matrix:
 
-\[
-K =
-\begin{bmatrix}
-f & 0 & c_x \\
-0 & f & c_y \\
-0 & 0 & 1
-\end{bmatrix}
-\]
+```text
+K = [ f  0  cx ]
+    [ 0  f  cy ]
+    [ 0  0   1 ]
+```
 
 ### Step 2 — Pixels to Rays
 
@@ -237,7 +230,7 @@ Also implemented in `src/dataset_3d.py`.
 For each pixel:
 
 - convert pixel coordinates into homogeneous image coordinates
-- unproject them using \(K^{-1}\)
+- unproject them using `K^-1`
 - rotate into world coordinates using the camera pose
 - normalize the direction vector
 
@@ -258,11 +251,9 @@ For each ray:
 - optionally perturb samples during training
 - compute 3D sample positions using
 
-\[
-\mathbf{x}(t) = \mathbf{o} + t\mathbf{d}
-\]
+`x(t) = o + t d`
 
-where \(\mathbf{o}\) is the ray origin and \(\mathbf{d}\) is the ray direction.
+where `o` is the ray origin and `d` is the ray direction.
 
 ### Step 4 — NeRF Network
 
@@ -273,7 +264,7 @@ The model contains:
 - a positional encoder for 3D locations
 - a positional encoder for viewing directions
 - an MLP trunk with a skip connection
-- a **density head** producing \(\sigma\)
+- a **density head** producing `sigma`
 - an **RGB head** producing view-dependent color
 
 The architecture follows the standard NeRF design:
@@ -288,15 +279,15 @@ Implemented in `src/rendering.py`.
 
 For each ray, the network predicts color and density at sampled points. These are composited using the discrete volume rendering equation:
 
-\[
-\hat{C}(\mathbf{r}) = \sum_i T_i \left(1 - e^{-\sigma_i \delta_i}\right)\mathbf{c}\_i
-\]
+$$
+\hat{C}(r) = \sum_i T_i \left(1 - \exp(-\sigma_i \delta_i)\right)c_i
+$$
 
 where:
 
-- \(T_i\) is the transmittance up to sample \(i\)
-- \(\sigma_i\) is the predicted density
-- \(\mathbf{c}\_i\) is the predicted color
+- `T_i` is the transmittance up to sample `i`
+- `sigma_i` is the predicted density
+- `c_i` is the predicted color
 
 This produces the final rendered pixel color.
 
