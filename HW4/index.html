@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>COMS4732 — Computer Vision 2 — HW4: Neural Radiance Fields</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-color: #ffffff;
+        --text-primary: #111111;
+        --text-secondary: #555555;
+        --accent-color: #f6f6f6;
+        --border-color: #e8e8e8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        max-width: 1100px;
+        margin: 60px auto;
+        line-height: 1.65;
+        color: var(--text-primary);
+        background-color: var(--bg-color);
+        padding: 0 24px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 60px;
+        padding-bottom: 24px;
+        gap: 24px;
+      }
+
+      .header-left h1 {
+        margin: 0 0 8px 0;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        font-size: 2.2rem;
+      }
+
+      .header-left h3 {
+        margin: 6px 0 0 0;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1.02rem;
+      }
+
+      .header-right {
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .meta {
+        font-size: 1rem;
+        color: var(--text-secondary);
+        font-weight: 300;
+      }
+
+      .section {
+        margin-bottom: 84px;
+      }
+
+      h2 {
+        font-weight: 500;
+        font-size: 1.6rem;
+        margin-bottom: 12px;
+        letter-spacing: -0.01em;
+      }
+
+      h3 {
+        font-weight: 600;
+        font-size: 1.06rem;
+        margin: 0 0 14px 0;
+        letter-spacing: -0.01em;
+      }
+
+      p {
+        color: var(--text-secondary);
+        max-width: 920px;
+        margin: 0 0 18px 0;
+      }
+
+      ul {
+        color: var(--text-secondary);
+        margin: 8px 0 0 18px;
+      }
+
+      li {
+        margin-bottom: 8px;
+      }
+
+      .step {
+        margin-top: 30px;
+      }
+
+      .images {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 34px;
+        align-items: start;
+      }
+
+      .images.two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .images.three-col {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      figure {
+        margin: 0;
+        break-inside: avoid;
+      }
+
+      img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 10px;
+        background-color: var(--accent-color);
+        border: 1px solid var(--border-color);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      img:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+      }
+
+      figcaption {
+        margin-top: 12px;
+        font-size: 0.92rem;
+        color: #777;
+        line-height: 1.55;
+      }
+
+      figcaption span.data {
+        display: block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        color: #333;
+        margin-top: 8px;
+        background: #f7f7f7;
+        padding: 6px 10px;
+        border-radius: 6px;
+        width: fit-content;
+        border: 1px solid var(--border-color);
+      }
+
+      .kv {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 10px 18px;
+        max-width: 920px;
+        margin-top: 14px;
+      }
+
+      .kv div.key {
+        color: var(--text-secondary);
+      }
+
+      .kv div.val {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.93rem;
+        color: #222;
+      }
+
+      .note {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        background: #fbfbfb;
+        border: 1px solid var(--border-color);
+        padding: 14px 16px;
+        border-radius: 10px;
+        margin-top: 14px;
+        max-width: 920px;
+      }
+
+      .badge {
+        display: inline-block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        background: #fafafa;
+        color: #333;
+        margin-right: 8px;
+        margin-bottom: 8px;
+      }
+
+      .toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .toc a {
+        text-decoration: none;
+        color: #222;
+        background: #fafafa;
+        border: 1px solid var(--border-color);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.92rem;
+      }
+
+      .toc a:hover {
+        background: #f2f2f2;
+      }
+
+      pre.codeblock {
+        font-family: "JetBrains Mono", monospace;
+        background: #f7f7f7;
+        border: 1px solid var(--border-color);
+        padding: 14px 16px;
+        border-radius: 10px;
+        overflow-x: auto;
+        max-width: 920px;
+        margin: 12px 0 0 0;
+        font-size: 0.9rem;
+        color: #222;
+        line-height: 1.55;
+      }
+
+      footer {
+        margin-top: 90px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 24px;
+        color: var(--text-secondary);
+        font-size: 0.92rem;
+      }
+
+      footer p {
+        margin: 6px 0;
+      }
+
+      @media (max-width: 900px) {
+        .images.three-col {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 800px) {
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .header-right {
+          text-align: left;
+          white-space: normal;
+        }
+
+        .images.two-col,
+        .kv {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="header-left">
+        <h1>COMS4732 — Computer Vision 2</h1>
+        <h3>Professor Aleksander Holynski</h3>
+        <h3>HW4: Neural Radiance Fields</h3>
+      </div>
+
+      <div class="header-right">
+        <div class="meta">Vibhav Kashyap — vk2581</div>
+      </div>
+    </header>
+
+    <section class="section" id="overview">
+      <h2>Overview</h2>
+      <p>
+        This homework explores neural field representations for both 2D image fitting and multi-view neural radiance fields.
+        In <b>Part 1</b>, I trained a coordinate-based MLP to map image coordinates to RGB values and studied the effect of
+        positional encoding and network width. In <b>Part 2</b>, I extended the idea to a NeRF pipeline by converting sampled
+        pixels from multiple calibrated views into rays, sampling 3D points along those rays, predicting color and density with
+        a NeRF network, and rendering novel views through volume rendering.
+      </p>
+
+      <div class="toc">
+        <a href="#part1">Part 1</a>
+        <a href="#part1-architecture">Part 1 Architecture</a>
+        <a href="#part1-results">Part 1 Results</a>
+        <a href="#part2">Part 2</a>
+        <a href="#part2-viser">Viser Visualizations</a>
+        <a href="#part2-architecture">NeRF Architecture</a>
+        <a href="#part2-results">Part 2 Results</a>
+      </div>
+    </section>
+
+    <section class="section" id="part1">
+      <h2>Part 1 — Fitting a Neural Field to a 2D Image</h2>
+      <p>
+        The deliverables for Part 1 were to report the model architecture and training setup, show training
+        progression for both the provided test image and one custom image, compare final outputs for different
+        positional encoding frequencies and hidden widths, and plot PSNR curves for the runs.
+      </p>
+
+      <div class="step" id="part1-architecture">
+        <h3>Model Architecture and Training Setup</h3>
+        <p>
+          I used a 2D neural field that maps pixel coordinates <i>(x, y)</i> to RGB color values <i>(r, g, b)</i>.
+          The input coordinates were first passed through sinusoidal positional encoding with maximum frequency
+          level <i>L</i> = 10. The encoded coordinates were then fed into a multilayer perceptron with
+          <b>3 hidden layers</b>, each of width <b>256</b>. ReLU was used after each hidden layer, and a
+          Sigmoid activation was used at the output layer so that the predicted RGB values stayed in the range [0, 1].
+        </p>
+        <p>
+          The model was trained using <b>MSE loss</b> and the <b>Adam optimizer</b> with a learning rate of
+          <b>1e-2</b>. The batch size was <b>10000</b>, and the network was trained for <b>2000 iterations</b>.
+        </p>
+
+        <div class="kv">
+          <div class="key"><b>Number of hidden layers</b></div>
+          <div class="val">3</div>
+
+          <div class="key"><b>Hidden width</b></div>
+          <div class="val">256</div>
+
+          <div class="key"><b>Positional encoding frequency</b></div>
+          <div class="val">L = 10</div>
+
+          <div class="key"><b>Activation functions</b></div>
+          <div class="val">ReLU (hidden), Sigmoid (output)</div>
+
+          <div class="key"><b>Loss function</b></div>
+          <div class="val">MSE</div>
+
+          <div class="key"><b>Optimizer</b></div>
+          <div class="val">Adam</div>
+
+          <div class="key"><b>Learning rate</b></div>
+          <div class="val">1e-2</div>
+
+          <div class="key"><b>Batch size</b></div>
+          <div class="val">10000</div>
+
+          <div class="key"><b>Training iterations</b></div>
+          <div class="val">2000</div>
+        </div>
+
+        <div class="note">
+          <b>PSNR curve settings:</b> for the PSNR run, I used <span class="badge">L = 10</span>
+          <span class="badge">hidden width = 256</span>
+          <span class="badge">hidden layers = 3</span>
+          <span class="badge">learning rate = 1e-2</span>
+          <span class="badge">batch size = 10000</span>
+          <span class="badge">iterations = 2000</span>
+        </div>
+      </div>
+
+      <div class="step" id="part1-results">
+        <h3>Training Progression — Provided Test Image</h3>
+        <div class="images">
+          <figure>
+            <img src="output/part1/test_training_progression.png" alt="Training progression on test image" />
+            <figcaption>
+              Training progression for the provided test image at different optimization stages.
+              This figure shows how the 2D neural field gradually fits the image as training proceeds.
+              <span class="data">output/part1/test_training_progression.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Training Progression — Custom Image</h3>
+        <div class="images">
+          <figure>
+            <img src="output/part1/myimg_training_progression.png" alt="Training progression on custom image" />
+            <figcaption>
+              Training progression for my custom image. This complements the test-image experiment and shows
+              that the same architecture can fit another RGB image through coordinate-based regression.
+              <span class="data">output/part1/myimg_training_progression.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Effect of Hyperparameters — Positional Encoding and Width</h3>
+        <div class="images">
+          <figure>
+            <img src="output/part1/test_hyperparameters_affect.png" alt="Hyperparameter comparison grid" />
+            <figcaption>
+              Final results for different choices of maximum positional encoding frequency and hidden width.
+              The 2×2 comparison highlights how low-capacity settings reduce high-frequency detail, while stronger
+              settings improve image reconstruction quality.
+              <span class="data">output/part1/test_hyperparameters_affect.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>PSNR Curves</h3>
+        <div class="images two-col">
+          <figure>
+            <img src="output/part1/test_PSNR_curve.png" alt="PSNR curve on test image" />
+            <figcaption>
+              PSNR curve for the provided test image.
+              <span class="data">output/part1/test_PSNR_curve.png</span>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="output/part1/myimg_PSNR_curve.png" alt="PSNR curve on custom image" />
+            <figcaption>
+              PSNR curve for my custom image.
+              <span class="data">output/part1/myimg_PSNR_curve.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Part 1 Summary</h3>
+        <p>
+          Overall, the 2D neural field successfully learned to represent both the provided image and my custom image.
+          Increasing positional encoding frequency and hidden width generally improved sharpness and fidelity, while
+          the PSNR curves showed steady optimization progress across training iterations.
+        </p>
+      </div>
+    </section>
+
+    <section class="section" id="part2">
+      <h2>Part 2 — Fitting a Neural Radiance Field from Multi-view Images</h2>
+      <p>
+        The deliverables for Part 2 were to briefly describe the implementation, visualize cameras, rays, and sampled
+        points in 3D, show training progression through rendered validation images, plot the validation PSNR curve,
+        and render a spherical orbit video of the lego scene using the provided test camera extrinsics.
+      </p>
+
+      <div class="step">
+        <h3>Implementation Overview</h3>
+        <p>
+          I built the NeRF pipeline around the provided multi-view lego dataset. The dataloader randomly samples pixels
+          from the training images, converts those pixels into rays using the corresponding camera intrinsics and extrinsics,
+          and returns ray origins, ray directions, and target RGB values. Along each ray, I sample 3D points between the
+          near and far bounds, evaluate the NeRF network at those points, and then perform volume rendering to obtain the
+          final predicted pixel color.
+        </p>
+        <p>
+          During training, batches of rays are rendered and supervised with the ground-truth pixel colors. For monitoring,
+          I periodically rendered held-out views from the validation set and tracked both training loss and validation PSNR.
+          After training, I used the learned model to synthesize novel views and generate a spherical orbit animation of the lego object.
+        </p>
+
+        <div class="note">
+          <b>Outputs included here:</b>
+          <span class="badge">output/part2/viser_visualization-1.png</span>
+          <span class="badge">output/part2/viser_visualization-2.png</span>
+          <span class="badge">output/part2/viser_visualization-3.png</span>
+          <span class="badge">output/part3/training_progression.png</span>
+          <span class="badge">output/part3/training loss and validation psnr.png</span>
+          <span class="badge">output/part3/lego_orbit.gif</span>
+        </div>
+      </div>
+
+      <div class="step" id="part2-viser">
+        <h3>Rays and Samples Visualization with Cameras (viser)</h3>
+        <p>
+          The following 3D visualizations show the multi-view camera setup together with sampled rays and their associated
+          points in space. These plots were useful for checking that the sampled rays remained consistent with the camera frustums
+          and that the ray geometry matched the scene layout.
+        </p>
+
+        <div class="images three-col">
+          <figure>
+            <img src="output/part2/viser_visualization-1.png" alt="Viser visualization 1" />
+            <figcaption>
+              Wide view of the camera arrangement with sampled rays and points.
+              <span class="data">output/part2/viser_visualization-1.png</span>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="output/part2/viser_visualization-2.png" alt="Viser visualization 2" />
+            <figcaption>
+              A closer inspection of rays emitted from one part of the camera ring toward the lego object.
+              <span class="data">output/part2/viser_visualization-2.png</span>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <img src="output/part2/viser_visualization-3.png" alt="Viser visualization 3" />
+            <figcaption>
+              Another viewpoint showing sampled rays intersecting the central object region from multiple cameras.
+              <span class="data">output/part2/viser_visualization-3.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step" id="part2-architecture">
+        <h3>NeRF Network Architecture</h3>
+        <p>
+          The model used for Part 2 follows the standard NeRF decomposition into a position branch, a density head,
+          and a view-dependent color branch. The 3D sample positions are first encoded with sinusoidal positional encoding,
+          and the shared trunk predicts a latent feature representation from which both density and color are derived.
+        </p>
+
+        <div class="kv">
+          <div class="key"><b>Position encoding</b></div>
+          <div class="val">3D world coordinates, L_xyz = 10, include_input = True</div>
+
+          <div class="key"><b>Direction encoding</b></div>
+          <div class="val">Ray direction, L_dir = 4, include_input = True</div>
+
+          <div class="key"><b>Shared trunk</b></div>
+          <div class="val">8 fully connected layers of width 256</div>
+
+          <div class="key"><b>Skip connection</b></div>
+          <div class="val">Concatenate encoded xyz input back after the 4th layer</div>
+
+          <div class="key"><b>Density head</b></div>
+          <div class="val">Linear(256 → 1) followed by Softplus for non-negative density</div>
+
+          <div class="key"><b>Feature branch</b></div>
+          <div class="val">Linear(256 → 256) + ReLU</div>
+
+          <div class="key"><b>RGB head</b></div>
+          <div class="val">Concatenate feature with encoded direction → Linear(256 + dir_dim → 128) → ReLU → Linear(128 → 3) → Sigmoid</div>
+
+          <div class="key"><b>Output ranges</b></div>
+          <div class="val">RGB in [0,1], density non-negative</div>
+        </div>
+
+        <pre class="codeblock">NeRF hyperparameters used in the implementation
+
+L_xyz = 10
+L_dir = 4
+hidden_dim = 256
+shared trunk = 8 layers
+skip connection = after layer 4
+sigma activation = Softplus
+RGB activation = Sigmoid</pre>
+
+        <div class="note">
+          The architecture follows the starter NeRF design from the homework diagram: positional encoding for 3D sample
+          positions and ray directions, a deep shared trunk with a skip connection, a density prediction head, and a
+          view-dependent color head.
+        </div>
+      </div>
+
+      <div class="step" id="part2-results">
+        <h3>Training Progression</h3>
+        <div class="images">
+          <figure>
+            <img src="output/part3/training_progression.png" alt="Part 2 training progression" />
+            <figcaption>
+              Predicted validation views across training iterations. As optimization proceeds, the object structure and appearance become progressively sharper,
+              and the rendered images move closer to the target lego scene.
+              <span class="data">output/part3/training_progression.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Training Loss and Validation PSNR</h3>
+        <div class="images">
+          <figure>
+            <img src="output/part3/training loss and validation psnr.png" alt="Training loss and validation PSNR" />
+            <figcaption>
+              Training loss together with validation PSNR over the course of learning. This plot summarizes convergence behavior and provides
+              a quantitative view of reconstruction quality on the validation set.
+              <span class="data">output/part3/training loss and validation psnr.png</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Spherical Rendering / Orbit Video</h3>
+        <div class="images">
+          <figure>
+            <img src="output/part3/lego_orbit.gif" alt="Lego orbit rendering gif" />
+            <figcaption>
+              Spherical rendering of the lego object produced by evaluating the trained NeRF on the provided test camera extrinsics.
+              The animation demonstrates novel-view synthesis from viewpoints not used directly as single training images.
+              <span class="data">output/part3/lego_orbit.gif</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>Part 2 Summary</h3>
+        <p>
+          The Part 2 pipeline combines multi-view geometry, ray sampling, neural scene representation, and volume rendering.
+          The viser visualizations helped verify the correctness of the data pipeline, the training progression and validation PSNR
+          show that the model improved steadily during optimization, and the orbit animation demonstrates that the learned representation
+          can synthesize coherent novel views of the lego scene.
+        </p>
+      </div>
+    </section>
+
+    <footer>
+      <p><b>Vibhav Kashyap</b> — UNI: vk2581</p>
+      <p>HW4 — Neural Radiance Fields</p>
+      <p>The code can also be found on GitHub -
+        https://github.com/vibhavk03/computer-vision-coms4732-hw1/blob/main/HW4/readme.md</p>
+    </footer>
+  </body>
+</html>
