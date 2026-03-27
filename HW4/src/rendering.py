@@ -4,10 +4,12 @@ import numpy as np
 from src.dataset_3d import pixels_to_rays
 
 
-def batched_T_i(sigmas: torch.Tensor, delta: torch.Tensor, device: str = "cuda"):
-    start = torch.ones((sigmas.shape[0], 1, 1)).to(device)
+def batched_T_i(sigmas: torch.Tensor, delta: torch.Tensor, device=None):
+    if device is None:
+        device = sigmas.device
 
-    exp_factors = torch.exp(-1 * sigmas * delta).to(device)
+    start = torch.ones((sigmas.shape[0], 1, 1), device=device, dtype=sigmas.dtype)
+    exp_factors = torch.exp(-sigmas * delta)
 
     return torch.cumprod(torch.cat([start, exp_factors[:, :-1]], dim=1), dim=1)
 
@@ -19,7 +21,11 @@ def sample_along_rays(
     far: float,
     num_samples_along_ray: int,
     perturb: bool = True,
-    device: str = "cuda",
+    device: str = (
+        "mps"
+        if torch.backends.mps.is_available()
+        else "cuda" if torch.cuda.is_available() else "cpu"
+    ),
 ):
     """Sample points along rays.
 
