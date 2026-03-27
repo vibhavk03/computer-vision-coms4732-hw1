@@ -96,7 +96,7 @@ def pixels_to_rays(
         r_ds: torch.Tensor of shape (num_pixels, 3) representing the ray directions
     """
     K = K.to(device)
-    c2w = c2w.to(torch.float64).to(device)
+    c2w = c2w.to(torch.float32).to(device)
     uvs = uvs.to(device)
 
     if verbose:
@@ -115,8 +115,8 @@ def pixels_to_rays(
 
     # ray directions: R @ K_inv @ [u, v, 1] for each pixel, then normalize
     K_inv = torch.linalg.inv(K).to(device)
-    M = R @ K_inv.to(torch.float64)  # (3, 3) — combines rotation and unprojection
-    dirs = (M @ homog_uvs.to(torch.float64).T).T  # (num_pixels, 3)
+    M = R @ K_inv.to(torch.float32)  # (3, 3) — combines rotation and unprojection
+    dirs = (M @ homog_uvs.to(torch.float32).T).T  # (num_pixels, 3)
     r_ds = dirs / torch.linalg.norm(dirs, dim=1, keepdim=True)
 
     if verbose:
