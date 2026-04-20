@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>COMS4732 — HW5A + HW5B</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #f9f8f6;
+        --surface: #ffffff;
+        --border: #e4e2de;
+        --text: #1a1917;
+        --muted: #6b6760;
+        --accent: #4e8c6a;
+        --accent-light: #edf5f0;
+        --accent-text: #1f4a32;
+        --mono-bg: #f3f2f0;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { scroll-behavior: smooth; }
+
+      body {
+        font-family: 'Sora', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+        padding: 0 24px;
+      }
+
+      .page {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 64px 0 100px;
+      }
+
+      header {
+        border-bottom: 2px solid var(--text);
+        padding-bottom: 32px;
+        margin-bottom: 72px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 24px;
+      }
+
+      header h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+      }
+
+      header h1 span { color: var(--accent); }
+
+      .header-meta {
+        text-align: right;
+        font-size: 0.9rem;
+        color: var(--muted);
+        line-height: 1.9;
+        white-space: nowrap;
+      }
+
+      .toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 72px;
+      }
+
+      .toc a {
+        text-decoration: none;
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 6px 14px;
+        border-radius: 999px;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+      }
+
+      .toc a:hover {
+        background: var(--accent-light);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      section { margin-bottom: 96px; }
+
+      .section-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 10px;
+      }
+
+      section > h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 14px;
+      }
+
+      section > p {
+        color: var(--muted);
+        max-width: 780px;
+        margin-bottom: 40px;
+        font-size: 0.97rem;
+      }
+
+      .step { margin-bottom: 56px; }
+
+      .step h3 {
+        font-size: 1.08rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .step p {
+        color: var(--muted);
+        font-size: 0.94rem;
+        max-width: 780px;
+        margin-bottom: 20px;
+      }
+
+      .img-grid { display: grid; gap: 24px; align-items: start; margin-top: 16px; }
+      .img-grid.one   { grid-template-columns: 1fr; }
+      .img-grid.two   { grid-template-columns: repeat(2, 1fr); }
+      .img-grid.three { grid-template-columns: repeat(3, 1fr); }
+
+      .compact-figure {
+        max-width: 760px;
+      }
+
+      .compact-figure img {
+        max-width: 100%;
+      }
+
+      figure { break-inside: avoid; }
+
+      figure img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--mono-bg);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      figure img:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 32px rgba(0,0,0,0.08);
+      }
+
+      figcaption {
+        margin-top: 10px;
+        font-size: 0.88rem;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      figcaption code {
+        display: inline-block;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.75rem;
+        background: var(--mono-bg);
+        border: 1px solid var(--border);
+        padding: 2px 7px;
+        border-radius: 4px;
+        color: #333;
+        margin-top: 6px;
+      }
+
+      .note {
+        background: var(--accent-light);
+        border-left: 3px solid var(--accent);
+        border-radius: 0 8px 8px 0;
+        padding: 14px 18px;
+        font-size: 0.91rem;
+        color: var(--accent-text);
+        max-width: 780px;
+        margin-top: 16px;
+      }
+
+      .kv {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 8px 20px;
+        max-width: 700px;
+        margin: 16px 0 32px;
+        font-size: 0.91rem;
+      }
+      .kv .k { color: var(--muted); }
+      .kv .v { font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: var(--text); }
+
+      footer {
+        border-top: 1px solid var(--border);
+        padding-top: 28px;
+        font-size: 0.88rem;
+        color: var(--muted);
+        line-height: 2;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="page">
+
+      <header>
+        <div>
+          <div class="section-label">COMS 4732 — Computer Vision 2</div>
+          <h1>HW5A — <span>The Power &amp; of Diffusion Models </span><br>and HW5B — Flow Matching from Scratch</h1>
+        </div>
+        <div class="header-meta">
+          <div>Prof. Aleksander Holynski</div>
+          <div>Vibhav Kashyap - vk2581</div>
+        </div>
+      </header>
+
+      <!-- <nav class="toc">
+        <a href="#sec-15">1.5 Sampled Images</a>
+        <a href="#sec-16">1.6 CFG Sampling</a>
+        <a href="#sec-17">1.7 Img-to-Img</a>
+        <a href="#sec-171">1.7.1 Hand-Drawn &amp; Web</a>
+        <a href="#sec-172">1.7.2 Inpainting</a>
+        <a href="#sec-173">1.7.3 Text-Conditioned Img-to-Img</a>
+        <a href="#sec-18">1.8 Visual Illusions</a>
+        <a href="#sec-19">1.9 Hybrid Images</a>
+        <a href="#sec-12">1.2 Noising Process</a>
+        <a href="#sec-121">1.2.1 Denoising Training</a>
+        <a href="#sec-122">1.2.2 OOD Testing</a>
+        <a href="#sec-123">1.2.3 Pure Noise</a>
+        <a href="#sec-22">2.2 Time-Conditioned Training</a>
+        <a href="#sec-23">2.3 Time-Conditioned Sampling</a>
+        <a href="#sec-25">2.5 Class-Conditioned Training</a>
+        <a href="#sec-26">2.6 Class-Conditioned Sampling</a>
+      </nav> -->
+
+
+
+
+      <!-- Part A -->
+      <section id="sec-15">
+        <div class="section-label">Part A · Section 1.5</div>
+        <h2>Diffusion Model Sampling</h2>
+        <p>
+          Starting from random noise and running the iterative denoising loop produces samples directly from the pretrained diffusion model.
+          The figure below shows the sampled outputs requested for Section 1.5.
+        </p>
+        <div class="step">
+          <h3>Sampled Images</h3>
+          <div class="img-grid one">
+            <figure class="compact-figure">
+              <img src="output/partA/1.5_image_stack.png" alt="Sampled images from diffusion model" />
+              <figcaption>
+                Samples generated from pure noise using the diffusion sampling loop.
+                <code>output/partA/1.5_image_stack.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-16">
+        <div class="section-label">Part A · Section 1.6</div>
+        <h2>Sampling with Classifier-Free Guidance</h2>
+        <p>
+          Classifier-free guidance improves image quality by combining conditional and unconditional predictions during denoising.
+          Compared with unguided sampling, the outputs are typically sharper and more aligned with the prompt.
+        </p>
+        <div class="step">
+          <h3>Sampled Images with CFG</h3>
+          <div class="img-grid one">
+            <figure class="compact-figure">
+              <img src="output/partA/1.6_image_stack.png" alt="Sampled images with classifier-free guidance" />
+              <figcaption>
+                Images sampled using classifier-free guidance.
+                <code>output/partA/1.6_image_stack.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-17">
+        <div class="section-label">Part A · Section 1.7</div>
+        <h2>Image-to-Image Translation</h2>
+        <p>
+          For image-to-image translation, a real image is first noised to an intermediate diffusion timestep and then denoised back.
+          Lower noise levels preserve more of the input structure, while higher noise levels allow the model to make stronger edits.
+        </p>
+        <div class="step">
+          <h3>Campanile and Additional Test Images</h3>
+          <div class="img-grid three">
+            <figure>
+              <img src="output/partA/1.7_test_img.png" alt="Campanile image-to-image translation" />
+              <figcaption>
+                Campanile edited with the image-to-image procedure.
+                <code>output/partA/1.7_test_img.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.7_my_img_1.png" alt="Custom test image 1 translation" />
+              <figcaption>
+                Additional test image 1 translated with the same procedure.
+                <code>output/partA/1.7_my_img_1.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.7_my_img_2.png" alt="Custom test image 2 translation" />
+              <figcaption>
+                Additional test image 2 translated with the same procedure.
+                <code>output/partA/1.7_my_img_2.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-171">
+        <div class="section-label">Part A · Section 1.7.1</div>
+        <h2>Editing Hand-Drawn and Web Images</h2>
+        <p>
+          This section applies the same image-to-image pipeline to non-photorealistic inputs. The goal is to project sketches and a web image
+          onto the natural image manifold while varying the noise level over values such as 1, 3, 5, 7, 10, and 20.
+        </p>
+        <div class="step">
+          <h3>Web Image</h3>
+          <div class="img-grid one">
+            <figure class="compact-figure">
+              <img src="output/partA/1.7.1_web_img.png" alt="Edited web image across multiple noise levels" />
+              <figcaption>
+                A web image edited across multiple noise levels using the same image-to-image method.
+                <code>output/partA/1.7.1_web_img.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="step">
+          <h3>Hand-Drawn Image 1</h3>
+          <div class="img-grid one">
+            <figure class="compact-figure">
+              <img src="output/partA/1.7.1_my_img_1.png" alt="Edited hand drawn image 1 across multiple noise levels" />
+              <figcaption>
+                Hand-drawn image 1 edited over multiple noise levels.
+                <code>output/partA/1.7.1_my_img_1.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="step">
+          <h3>Hand-Drawn Image 2</h3>
+          <div class="img-grid one">
+            <figure class="compact-figure">
+              <img src="output/partA/1.7.1_my_img_2.png" alt="Edited hand drawn image 2 across multiple noise levels" />
+              <figcaption>
+                Hand-drawn image 2 edited over multiple noise levels.
+                <code>output/partA/1.7.1_my_img_2.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-172">
+        <div class="section-label">Part A · Section 1.7.2</div>
+        <h2>Inpainting</h2>
+        <p>
+          Inpainting keeps the unmasked part of the image fixed while letting the diffusion model regenerate masked regions.
+          Below are the Campanile result and two additional masked edits.
+        </p>
+        <div class="step">
+          <h3>Inpainting Results</h3>
+          <div class="img-grid three">
+            <figure>
+              <img src="output/partA/1.7.2_campanile.png" alt="Original Campanile image for inpainting" />
+              <figcaption>
+                Original Campanile input.
+                <code>output/partA/1.7.2_campanile.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.7.2_campanile_inpainted.png" alt="Inpainted Campanile" />
+              <figcaption>
+                Inpainted Campanile result.
+                <code>output/partA/1.7.2_campanile_inpainted.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.7.2_road.png" alt="Original road image for inpainting" />
+              <figcaption>
+                Original custom image 1.
+                <code>output/partA/1.7.2_road.png</code>
+              </figcaption>
+            </figure>
+          </div>
+          <div class="img-grid three" style="margin-top: 24px;">
+            <figure>
+              <img src="output/partA/1.7.2_road_inpainted.png" alt="Inpainted road image" />
+              <figcaption>
+                Inpainted custom image 1.
+                <code>output/partA/1.7.2_road_inpainted.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.7.2_venice.png" alt="Original Venice image for inpainting" />
+              <figcaption>
+                Original custom image 2.
+                <code>output/partA/1.7.2_venice.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.7.2_venice_inpainted.png" alt="Inpainted Venice image" />
+              <figcaption>
+                Inpainted custom image 2.
+                <code>output/partA/1.7.2_venice_inpainted.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-173">
+        <div class="section-label">Part A · Section 1.7.3</div>
+        <h2>Text-Conditioned Image-to-Image Translation</h2>
+        <p>
+          Here the denoising process is guided not only by the starting image but also by a prompt embedding.
+          This lets the model preserve broad structure from the input while steering the output toward the requested text condition.
+        </p>
+        <div class="step">
+          <h3>Text-Conditional Edits</h3>
+          <div class="img-grid three">
+            <figure>
+              <img src="output/partA/1.7.3_companile.png" alt="Text conditioned Campanile edits" />
+              <figcaption>
+                Campanile edits across multiple noise levels with text conditioning.
+                <code>output/partA/1.7.3_companile.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.7.3_my_img_1.png" alt="Text conditioned edits for custom image 1" />
+              <figcaption>
+                Text-conditioned edits for custom image 1.
+                <code>output/partA/1.7.3_my_img_1.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.7.3_my_img_2.png" alt="Text conditioned edits for custom image 2" />
+              <figcaption>
+                Text-conditioned edits for custom image 2.
+                <code>output/partA/1.7.3_my_img_2.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-18">
+        <div class="section-label">Part A · Section 1.8</div>
+        <h2>Visual Illusions</h2>
+        <p>
+          Visual anagrams are constructed so that one interpretation appears in the original orientation and a second interpretation appears after a transformation.
+          Below are two illusion results included for this part.
+        </p>
+        <div class="step">
+          <h3>Two Illusions of Choice</h3>
+          <div class="img-grid two">
+            <figure>
+              <img src="output/partA/1.8_img_1.png" alt="Visual illusion 1" />
+              <figcaption>
+                Visual illusion 1.
+                <code>output/partA/1.8_img_1.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.8_img_2.png" alt="Visual illusion 2" />
+              <figcaption>
+                Visual illusion 2.
+                <code>output/partA/1.8_img_2.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-19">
+        <div class="section-label">Part A · Section 1.9</div>
+        <h2>Hybrid Images and Roar-ee Translation</h2>
+        <p>
+          Hybrid images combine coarse low-frequency structure from one image with high-frequency details from another.
+          This section also includes the Roar-ee image-to-image result that was generated for Columbia's mascot prompt.
+        </p>
+        <div class="step">
+          <h3>Hybrid Images</h3>
+          <div class="img-grid two">
+            <figure>
+              <img src="output/partA/1.9_img_1.png" alt="Hybrid image 1" />
+              <figcaption>
+                Hybrid image 1.
+                <code>output/partA/1.9_img_1.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partA/1.9_img_2.png" alt="Hybrid image 2" />
+              <figcaption>
+                Hybrid image 2.
+                <code>output/partA/1.9_img_2.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="step">
+          <h3>2.0 Roar-ee Image-to-Image Translation</h3>
+          <div class="img-grid one">
+            <figure class="compact-figure">
+              <img src="output/partA/2_roaree_skull.png" alt="Roar-ee image to image translation" />
+              <figcaption>
+                Columbia Roar-ee themed image-to-image translation result.
+                <code>output/partA/2_roaree_skull.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+      <!-- 1.2 -->
+      <section id="sec-12">
+        <div class="section-label">Part B · Section 1.2</div>
+        <h2>Visualizing the Noising Process</h2>
+        <p>
+          Clean MNIST images are corrupted via <em>z = x + σε</em> where <em>ε ~ N(0, I)</em>.
+          We visualize σ ∈ {0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0} on a single digit.
+        </p>
+        <div class="step">
+          <h3>Noising at Different σ Levels</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/1.2_noising_process.png" alt="Noising process" />
+              <figcaption>
+                A single MNIST digit corrupted at σ = 0.0 → 1.0 (left to right).
+                <code>output/partB/1.2_noising_process.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 1.2.1 -->
+      <section id="sec-121">
+        <div class="section-label">Part B · Section 1.2.1</div>
+        <h2>Training the Denoiser (σ = 0.5)</h2>
+        <p>
+          An unconditional UNet is trained to map noisy images (σ = 0.5) back to their clean
+          counterparts using an L2 loss. Noise is sampled fresh each iteration for better generalisation.
+        </p>
+        <div class="kv">
+          <div class="k">Architecture</div><div class="v">UnconditionalUNet, D = 128</div>
+          <div class="k">Optimizer</div><div class="v">Adam, lr = 1e-4</div>
+          <div class="k">Batch size</div><div class="v">256</div>
+          <div class="k">Epochs</div><div class="v">5</div>
+          <div class="k">Noise level σ</div><div class="v">0.5</div>
+        </div>
+
+        <div class="step">
+          <h3>Training Loss Curve</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/1.2.1_training_loss_curve.png" alt="Training loss" />
+              <figcaption>
+                MSE loss across all 5 epochs of σ = 0.5 denoising training.
+                <code>output/partB/1.2.1_training_loss_curve.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="step">
+          <h3>Denoising Results — Epoch 1 &amp; Epoch 5</h3>
+          <div class="img-grid two">
+            <figure>
+              <img src="output/partB/1.2.1_denoising_epoch_1.png" alt="Denoising epoch 1" />
+              <figcaption>
+                Epoch 1 — coarse structure recovered but outputs are slightly blurry.
+                <code>output/partB/1.2.1_denoising_epoch_1.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partB/1.2.1_denoising_epoch_5.png" alt="Denoising epoch 5" />
+              <figcaption>
+                Epoch 5 — sharper and more faithful to the original digits.
+                <code>output/partB/1.2.1_denoising_epoch_5.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 1.2.2 -->
+      <section id="sec-122">
+        <div class="section-label">Part B · Section 1.2.2</div>
+        <h2>Out-of-Distribution Noise Testing</h2>
+        <p>
+          The denoiser trained at σ = 0.5 is evaluated on σ ∈ {0.0, 0.2, 0.4, 0.5, 0.6, 0.8, 1.0}
+          to understand how performance degrades outside the training distribution.
+        </p>
+        <div class="step">
+          <h3>OOD Denoising Results</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/1.2.2_ood_testing.png" alt="OOD testing" />
+              <figcaption>
+                Top row: noisy inputs. Bottom row: denoiser outputs.
+                Performance degrades at extremes — over-smoothing at low σ, failing at high σ.
+                <code>output/partB/1.2.2_ood_testing.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 1.2.3 -->
+      <section id="sec-123">
+        <div class="section-label">Part B · Section 1.2.3</div>
+        <h2>Denoising Pure Noise</h2>
+        <p>
+          The UNet is retrained with pure Gaussian noise ε ~ N(0, I) as input and a clean MNIST digit
+          as target. Since the input carries no class information, the model learns to output the
+          <em>mean</em> of the training distribution.
+        </p>
+
+        <div class="step">
+          <h3>Training Loss Curve — Pure Noise</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/1.2.3_training_loss_pure_noise.png" alt="Pure noise training loss" />
+              <figcaption>
+                Loss drops sharply then plateaus at ~0.07 — the irreducible variance of MNIST around its mean.
+                <code>output/partB/1.2.3_training_loss_pure_noise.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="step">
+          <h3>Sample Results — Epoch 1 &amp; Epoch 5</h3>
+          <div class="img-grid two">
+            <figure>
+              <img src="output/partB/1.2.3_pure_noise_epoch_1.png" alt="Pure noise epoch 1" />
+              <figcaption>
+                Epoch 1 — model begins converging toward a mean-digit shape.
+                <code>output/partB/1.2.3_pure_noise_epoch_1.png</code>
+              </figcaption>
+            </figure>
+            <figure>
+              <img src="output/partB/1.2.3_pure_noise_epoch_5.png" alt="Pure noise epoch 5" />
+              <figcaption>
+                Epoch 5 — every input maps to the same blurry digit-like blob.
+                <code>output/partB/1.2.3_pure_noise_epoch_5.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Observation:</strong> All outputs collapse to a single blurry averaged digit regardless of
+          the input noise. With MSE loss the optimal unconditional predictor is the mean of all training images —
+          the centroid of the digit distribution. This motivates flow matching and class conditioning in Part 2.
+        </div>
+      </section>
+
+
+      <!-- 2.2 -->
+      <section id="sec-22">
+        <div class="section-label">Part B · Section 2.2</div>
+        <h2>Training the Time-Conditioned UNet</h2>
+        <p>
+          Flow matching trains u<sub>θ</sub>(x<sub>t</sub>, t) to predict the velocity field
+          <em>x₁ − x₀</em> along linear interpolations between noise and clean data.
+          Euler integration from t = 0 → 1 recovers a realistic sample at inference.
+        </p>
+        <div class="kv">
+          <div class="k">Architecture</div><div class="v">TimeConditionalUNet, D = 128</div>
+          <div class="k">Conditioning</div><div class="v">Scalar t via 2 FCBlocks</div>
+          <div class="k">Optimizer</div><div class="v">Adam, lr = 1e-4</div>
+          <div class="k">Epochs</div><div class="v">10</div>
+          <div class="k">Timesteps (inference)</div><div class="v">50</div>
+        </div>
+
+        <div class="step">
+          <h3>Training Loss Curve</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/2.2_fm_training_loss.png" alt="Time-conditioned training loss" />
+              <figcaption>
+                Flow matching loss (MSE on predicted vs. true velocity) across 10 epochs.
+                <code>output/partB/2.2_fm_training_loss.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 2.3 -->
+      <section id="sec-23">
+        <div class="section-label">Part B · Section 2.3</div>
+        <h2>Sampling from the Time-Conditioned UNet</h2>
+        <p>
+          Starting from pure Gaussian noise, 50 Euler steps integrate the learned velocity field.
+          Results shown after 1 and 10 epochs of training.
+        </p>
+        <div class="step">
+          <h3>Generated Samples — Epoch 1</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/2.3_fm_samples_epoch_1.png" alt="FM samples epoch 1" />
+              <figcaption>
+                Epoch 1 — outputs are noisy and loosely digit-shaped.
+                <code>output/partB/2.3_fm_samples_epoch_1.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="step">
+          <h3>Generated Samples — Epoch 5</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/2.3_fm_samples_epoch_5.png" alt="FM samples epoch 5" />
+              <figcaption>
+                Epoch 5 — recognisable digit shapes emerge with improved sharpness and diversity.
+                <code>output/partB/2.3_fm_samples_epoch_5.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="step">
+          <h3>Generated Samples — Epoch 10</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/2.3_fm_samples_epoch_10.png" alt="FM samples epoch 10" />
+              <figcaption>
+                Epoch 10 — samples are clearly digit-like, randomly distributed across 0–9.
+                <code>output/partB/2.3_fm_samples_epoch_10.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 2.5 -->
+      <section id="sec-25">
+        <div class="section-label">Part B · Section 2.5</div>
+        <h2>Training the Class-Conditioned UNet</h2>
+        <p>
+          The UNet is extended with class conditioning via one-hot digit labels (0–9), injected through
+          two additional FCBlocks. CFG dropout (p<sub>uncond</sub> = 0.1) enables unconditional generation.
+        </p>
+        <div class="kv">
+          <div class="k">Architecture</div><div class="v">ClassConditionalUNet, D = 128</div>
+          <div class="k">Conditioning</div><div class="v">t + c (one-hot, 10 classes) via 4 FCBlocks</div>
+          <div class="k">CFG dropout p_uncond</div><div class="v">0.1</div>
+          <div class="k">Guidance scale γ</div><div class="v">5.0 (inference)</div>
+          <div class="k">Optimizer</div><div class="v">Adam, lr = 1e-4</div>
+          <div class="k">Epochs</div><div class="v">10</div>
+        </div>
+
+        <div class="step">
+          <h3>Training Loss Curve</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/2.5_class_fm_training_loss.png" alt="Class-conditioned training loss" />
+              <figcaption>
+                Flow matching loss for the class-conditioned model across 10 epochs.
+                Convergence is faster than the unconditional model.
+                <code>output/partB/2.5_class_fm_training_loss.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- 2.6 -->
+      <section id="sec-26">
+        <div class="section-label">Part B · Section 2.6</div>
+        <h2>Sampling from the Class-Conditioned UNet</h2>
+        <p>
+          Using classifier-free guidance (γ = 5.0), four instances of each digit 0–9 are generated.
+          Each column = one digit class. Results shown after 1, 5, and 10 epochs.
+        </p>
+
+        <div class="step">
+          <h3>Generated Samples — Epoch 1</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/2.6_class_fm_samples_epoch_1.png" alt="Class FM epoch 1" />
+              <figcaption>
+                After epoch 1 digit classes are already partially separable with CFG.
+                <code>output/partB/2.6_class_fm_samples_epoch_1.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="step">
+          <h3>Generated Samples — Epoch 5</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/2.6_class_fm_samples_epoch_5.png" alt="Class FM epoch 5" />
+              <figcaption>
+                By epoch 5 digit identity is clear for most classes.
+                <code>output/partB/2.6_class_fm_samples_epoch_5.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="step">
+          <h3>Generated Samples — Epoch 10</h3>
+          <div class="img-grid one">
+            <figure>
+              <img src="output/partB/2.6_class_fm_samples_epoch_10.png" alt="Class FM epoch 10" />
+              <figcaption>
+                After 10 epochs samples are sharp, recognisable, and well-separated by class.
+                <code>output/partB/2.6_class_fm_samples_epoch_10.png</code>
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>Learning Rate Scheduler:</strong> We did not use a learning rate scheduler in any part
+          of this project. A fixed Adam optimizer with lr = 1e-4 was sufficient to achieve stable
+          convergence throughout all training runs. The fixed learning rate served as an implicit form
+          of regularisation and no scheduler was needed to compensate.
+        </div>
+      </section>
+
+
+      <footer>
+        <p>COMS 4732 — Computer Vision 2 — HW5A + HW5B</p>
+      </footer>
+
+    </div>
+  </body>
+</html>
